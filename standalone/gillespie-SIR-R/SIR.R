@@ -117,10 +117,10 @@ SIR <- gillespie(M0 = M0,tmax = 50,pars = pars,haz = hazard,info = 100)
 
 ymax <- max(SIR[,2:ncol(SIR)]) + 10
 SIRcolor <-   c(S="steelblue",I="firebrick3",R="darkorchid3")
-plot(x = SIR[,"time"],y = SIR[,"S"],type = "l",col = SIRcolor["S"],lwd = 1.5,
+plot(x = SIR[,"time"],y = SIR[,"S"],type = "l",col = SIRcolor["S"],lwd = 1.85,
      ylim = c(0,ymax),xlab = "Time (days)",ylab = "Count",main = "Stochastic SIR")
-lines(x = SIR[,"time"],y = SIR[,"I"],col = SIRcolor["I"],lwd = 1.5)
-lines(x = SIR[,"time"],y = SIR[,"R"],col = SIRcolor["R"],lwd = 1.5)
+lines(x = SIR[,"time"],y = SIR[,"I"],col = SIRcolor["I"],lwd = 1.85)
+lines(x = SIR[,"time"],y = SIR[,"R"],col = SIRcolor["R"],lwd = 1.85)
 
 # plot(x = SIR[,"time"],y = SIR[,"I"],type = "l",col = SIRcolor["I"],lwd = 1.5,
 #      xlab = "Time (days)",ylab = "Infecteds")
