@@ -5,29 +5,44 @@
 #    ___/ // // _, _/_____/ _, _/ 
 #   /____/___/_/ |_|     /_/ |_|  
 # 
-#   The stochastic SIR model example in R
+#   The stochastic SIR model example
 #   Sean Wu (slwu89@berkeley.edu)
 #   May 2019
 # 
 ################################################################################
 
+
+################################################################################
+#   load packages and source files
+################################################################################
+
 rm(list=ls());gc()
+library(here)
+library(Rcpp)
+
+source(here::here("gillespie-SIR-R/gillespie-sim.R"))
+sourceCpp(here::here("gillespie-SIR-CXX/gillespie-sim.cpp"))
+
+
+################################################################################
+#   create the SPN model
+################################################################################
 
 # initial marking of net
-T <- c("inf","rec")
-P <- c("S","I","R")
+SPN_T <- c("inf","rec")
+SPN_P <- c("S","I","R")
 
 Pre <- matrix(data = c(
   1,1,0,
   0,1,0
-),nrow = length(T),ncol = length(P),byrow = TRUE,
-dimnames = list(T,P))
+),nrow = length(SPN_T),ncol = length(SPN_P),byrow = TRUE,
+dimnames = list(SPN_T,SPN_P))
 
 Post <- matrix(data = c(
   0,2,0,
   0,0,1
-),nrow = length(T),ncol = length(P),byrow = TRUE,
-dimnames = list(T,P))
+),nrow = length(SPN_T),ncol = length(SPN_P),byrow = TRUE,
+dimnames = list(SPN_T,SPN_P))
 
 A <- Post - Pre
 S <- t(A)
@@ -61,64 +76,21 @@ hazard <- function(t,state,pars,...){
   
 }
 
-# Gillespie simulator for a SPN
-gillespie <- function(M0,tmax,pars,haz,info=100,prealloc=1e4){
-  
-  S <- pars$S
-  time <- 0
-  M <- M0
-  u <- nrow(S)
-  v <- ncol(S)
-  
-  out <- matrix(data = NaN,nrow = prealloc,ncol = u+1,dimnames = list(NULL,c("time",P)))
-  i <- 1
-  out[i,] <- c(time,M)
-  
-  while(time < tmax){
-    
-    # evaluate hazard function
-    h <- haz(time,M,pars)
-    
-    # if all events have probability 0, break the loop
-    if(sum(h) <= .Machine$double.eps){
-      cat(" --- all events have probability 0, breaking from simulation at time: ",round(time,3)," --- \n")
-      break
-    }
-    
-    # Gillespie's direct method: P(what | when) * P(when)
-    time <- time + rexp(n = 1,rate = sum(h))
-    j <- sample.int(n = v,size = 1,prob = h)
-    
-    # update marking and output
-    M <- M + S[,j]
-    i <- i + 1
-    if(i > nrow(out)){
-      out <- rbind(out,matrix(data = NaN,nrow = prealloc,ncol = u+1,dimnames = list(NULL,c("time",P))))
-    }
-    out[i,] <- c(time,M)
-    
-    if(i%%info==0){
-      cat(" --- simulation at time: ",round(time,3)," --- \n")
-    }
-  }
-  
-  # dont return rows that are just for memory pre-allocation
-  return(
-    out[!is.nan(rowSums(out)),]
-  )
-}
 
-# run the stochastic epidemic model
-M0 <- setNames(c(1e3,1,0),P)
+################################################################################
+#   run the stochastic SIR model
+################################################################################
+
+# initial marking of SPN
+M0 <- setNames(c(1e3,1,0),SPN_P)
 
 theta <- list("R0"=0.005,"gamma"=1/50,"delta"=1/365)
-pars <- list(Pre=Pre,Post=Post,S=S,T=T,P=P)
+pars <- list(Pre=Pre,Post=Post,S=S,T=SPN_T,P=SPN_P)
 pars <- c(pars,theta)
 
-SIR <- gillespieCXX(M0 = M0,tmax = 250,pars = pars,haz = hazard,info = 100)
-SIR <- SIR[!is.na(rowSums(SIR)),]
-
-SIR <- gillespie(M0 = M0,tmax = 250,pars = pars,haz = hazard,info = 100)
+set.seed(42)
+SIR <- gillespie_CXX(M0 = M0,tmax = 250,pars = pars,haz = hazard,info = 100)
+SIR <- gillespie_R(M0 = M0,tmax = 250,pars = pars,haz = hazard,info = 100)
 
 # plot trajectory
 ymax <- max(SIR[,2:ncol(SIR)]) + 10

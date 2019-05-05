@@ -1,9 +1,17 @@
+
+
+
+/* Rcpp header file */
 #include <Rcpp.h>
+
+/* algorithm for std::accumulate, iomanip for std::setw */
 #include <algorithm>
 #include <iomanip>
+#include <string>
+#include <sstream>
 
 // [[Rcpp::export]]
-Rcpp::NumericMatrix gillespieCXX(const Rcpp::IntegerVector& M0,
+Rcpp::NumericMatrix gillespie_CXX(const Rcpp::IntegerVector& M0,
                                  const double tmax,
                                  const Rcpp::List& pars,
                                  const Rcpp::Function& haz,
@@ -46,8 +54,9 @@ Rcpp::NumericMatrix gillespieCXX(const Rcpp::IntegerVector& M0,
     /* if all events have probability 0, break the loop */
     double h0 = std::accumulate(h.begin(),h.end(),0.);
     if(h0 <= 2.22e-16){
-      Rcpp::Rcout << " --- all events have probability 0, breaking from simulation at time: " << std::setw(4) << time << " --- \n";
-      Rcpp::stop("\n");
+      std::stringstream msg;
+      msg << " --- all events have probability 0, breaking from simulation at time: " << std::setw(4) << time << " --- \n";
+      Rcpp::stop(msg.str());
     }
     
     /* Gillespie's direct method: P(what | when) * P(when) */
@@ -82,7 +91,15 @@ Rcpp::NumericMatrix gillespieCXX(const Rcpp::IntegerVector& M0,
     
   }
   
-  // Rcpp::IntegerVector rowsums = Rcpp::rowSums(out);
-  // Rcpp::LogicalVector row2r = !Rcpp::is_nan(rowsums);
-  return out;
+  // only return the portion of the matrix with actual values
+  Rcpp::NumericVector rowsums = Rcpp::rowSums(out);
+  bool hasnan = Rcpp::any(Rcpp::is_nan(rowsums));
+  if(hasnan){
+    rowsums = Rcpp::na_omit(rowsums);
+    out = out(Rcpp::Range(0,rowsums.size()-1), Rcpp::_ );
+    Rcpp::colnames(out) = colnames;
+    return out;
+  } else {
+    return out;
+  }
 };
