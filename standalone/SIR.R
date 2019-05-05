@@ -109,3 +109,15 @@ lines(x = SIR[,"time"],y = SIR[,"R"],col = SIRcolor["R"],lwd = 1.85)
 ################################################################################
 
 sourceCpp(here::here("gillespie-SIR-CXX-headers/gillespie-sim-headers.cpp"))
+
+# please don't use this to get seeds for real applications
+seed <- as.integer((as.double(Sys.time())*1000+Sys.getpid()) %% 2^31)
+
+SIR <- gillespie_CXX_h(M0 = M0,tmax = 250,pars = pars,haz = hazard,seed = seed,info = 100)
+
+ymax <- max(SIR[,2:ncol(SIR)]) + 10
+SIRcolor <-   c(S="steelblue",I="firebrick3",R="darkorchid3")
+plot(x = SIR[,"time"],y = SIR[,"S"],type = "l",col = SIRcolor["S"],lwd = 1.85,
+     ylim = c(0,ymax),xlab = "Time (days)",ylab = "Count",main = "Stochastic SIR")
+lines(x = SIR[,"time"],y = SIR[,"I"],col = SIRcolor["I"],lwd = 1.85)
+lines(x = SIR[,"time"],y = SIR[,"R"],col = SIRcolor["R"],lwd = 1.85)

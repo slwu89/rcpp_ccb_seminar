@@ -22,34 +22,35 @@
 /* header guards */
 #ifndef GILLESPIE_PRNG
 #define GILLESPIE_PRNG
- 
+
 #include <Rcpp.h>
 #include <random>
  
- class prng {
- public:
-   
-   /* constructor & destructor */
-   prng(const uint_least32_t seed);
-   ~prng(){};
-   
-   /* delete copy constructor/assignment operator, default move constructor/assignment operator */
-   prng(const prng&) = delete;
-   prng& operator=(const prng&) = delete;
-   prng(prng&&) = default;
-   prng& operator=(prng&&) = default;
-   
-   /* continuous random univariate sampling */
-   double                                 get_runif();
-   double                                 get_rexp(const double rate);
-   
-   /* discrete random multivariate sampling */
-   size_t                                 get_rcategorical(const Rcpp::NumericVector& prob);
-   
- private:
-   std::mt19937                            rng;
-   std::uniform_real_distribution<double>  runif;
- };
+// a class that uses STL's Mersenne Twister (also what R uses, FWIW) to get "random" numbers ...
+class prng {
+public:
  
+ /* constructor & destructor */
+ prng(const uint_least32_t seed);
+ ~prng(){};
+ 
+ /* delete copy constructor/assignment operator, default move constructor/assignment operator */
+ prng(const prng&) = delete;
+ prng& operator=(const prng&) = delete;
+ prng(prng&&) = default;
+ prng& operator=(prng&&) = default;
+ 
+ /* continuous random univariate sampling */
+ double                                 get_runif();
+ double                                 get_rexp(const double rate);
+ 
+ /* discrete random multivariate sampling */
+ size_t                                 get_rcategorical(const Rcpp::NumericVector& prob);
+ 
+private:
+ std::mt19937                            rng;
+ std::uniform_real_distribution<double>  runif;
+};
+
  
 #endif

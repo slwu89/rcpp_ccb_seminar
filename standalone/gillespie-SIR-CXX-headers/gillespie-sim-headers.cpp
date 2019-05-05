@@ -45,7 +45,7 @@ using prng_ptr = std::unique_ptr<prng>;
                                    const size_t prealloc = 1e4
  ){
    
-   /* initialize my prng */
+   /* initialize prng */
    prng_ptr PRNG = std::make_unique<prng>(seed);
    
    /* set up local variables */
