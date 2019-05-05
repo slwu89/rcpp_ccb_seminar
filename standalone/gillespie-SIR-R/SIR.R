@@ -64,6 +64,7 @@ hazard <- function(t,state,pars,...){
 # Gillespie simulator for a SPN
 gillespie <- function(M0,tmax,pars,haz,info=100,prealloc=1e4){
   
+  S <- pars$S
   time <- 0
   M <- M0
   u <- nrow(S)
@@ -113,6 +114,9 @@ M0 <- setNames(c(1e3,1,0),P)
 theta <- list("R0"=0.005,"gamma"=1/50,"delta"=1/365)
 pars <- list(Pre=Pre,Post=Post,S=S,T=T,P=P)
 pars <- c(pars,theta)
+
+SIR <- gillespieCXX(M0 = M0,tmax = 250,pars = pars,haz = hazard,info = 100)
+SIR <- SIR[!is.na(rowSums(SIR)),]
 
 SIR <- gillespie(M0 = M0,tmax = 250,pars = pars,haz = hazard,info = 100)
 
