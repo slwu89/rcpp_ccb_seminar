@@ -44,13 +44,14 @@ Rcpp::NumericMatrix gillespieCXX(const Rcpp::IntegerVector& M0,
     Rcpp::NumericVector h = haz(time,M,pars);
     
     /* if all events have probability 0, break the loop */
-    if(std::accumulate(h.begin(),h.end(),0.) <= 2.22e-16){
+    double h0 = std::accumulate(h.begin(),h.end(),0.);
+    if(h0 <= 2.22e-16){
       Rcpp::Rcout << " --- all events have probability 0, breaking from simulation at time: " << std::setw(4) << time << " --- \n";
       Rcpp::stop("\n");
     }
     
     /* Gillespie's direct method: P(what | when) * P(when) */
-    time += R::rexp(1./std::accumulate(h.begin(),h.end(),0.));
+    time += R::rexp(1./h0);
     size_t j = Rcpp::as<size_t>(Rcpp::sample(v,1,false,h,false));
     
     /* update marking and output */
