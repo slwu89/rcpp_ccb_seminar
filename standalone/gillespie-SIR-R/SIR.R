@@ -80,6 +80,7 @@ gillespie <- function(M0,tmax,pars,haz,info=100,prealloc=1e4){
     
     # if all events have probability 0, break the loop
     if(sum(h) <= .Machine$double.eps){
+      cat(" --- all events have probability 0, breaking from simulation at time: ",round(time,3)," --- \n")
       break
     }
     
@@ -109,11 +110,11 @@ gillespie <- function(M0,tmax,pars,haz,info=100,prealloc=1e4){
 # run the stochastic epidemic model
 M0 <- setNames(c(1e3,1,0),P)
 
-theta <- list("R0"=0.01,"gamma"=1/20,"delta"=1/365)
+theta <- list("R0"=0.005,"gamma"=1/50,"delta"=1/365)
 pars <- list(Pre=Pre,Post=Post,S=S,T=T,P=P)
 pars <- c(pars,theta)
 
-SIR <- gillespie(M0 = M0,tmax = 50,pars = pars,haz = hazard,info = 100)
+SIR <- gillespie(M0 = M0,tmax = 250,pars = pars,haz = hazard,info = 100)
 
 # plot trajectory
 ymax <- max(SIR[,2:ncol(SIR)]) + 10
