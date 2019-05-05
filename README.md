@@ -12,4 +12,4 @@ This directory uses the running example of a stochastic SIR model to demonstrate
   
 ### gillespieCXX
 
-This is an example R package which uses Rcpp to integrate C++ code. It illustrates several concepts including breaking the code into header (xxx.h) and implementation (xxx.cpp), as well as returning STL objects to R with Rcpp::wrap, and using smart pointers in C++ code
+This is an example R package which uses Rcpp to integrate C++ code. It illustrates several concepts including breaking the code into header (xxx.h) and implementation (xxx.cpp), as well as returning STL objects to R with `Rcpp::wrap`, and using smart pointers in C++ code
