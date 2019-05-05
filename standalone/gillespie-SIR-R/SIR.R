@@ -96,7 +96,7 @@ gillespie <- function(M0,tmax,pars,haz,info=100,prealloc=1e4){
     out[i,] <- c(time,M)
     
     if(i%%info==0){
-      cat(" --- simulation at time: ",time," --- \n")
+      cat(" --- simulation at time: ",round(time,3)," --- \n")
     }
   }
   
@@ -106,15 +106,16 @@ gillespie <- function(M0,tmax,pars,haz,info=100,prealloc=1e4){
   )
 }
 
+# run the stochastic epidemic model
 M0 <- setNames(c(1e3,1,0),P)
 
 theta <- list("R0"=0.01,"gamma"=1/20,"delta"=1/365)
-
 pars <- list(Pre=Pre,Post=Post,S=S,T=T,P=P)
 pars <- c(pars,theta)
 
 SIR <- gillespie(M0 = M0,tmax = 50,pars = pars,haz = hazard,info = 100)
 
+# plot trajectory
 ymax <- max(SIR[,2:ncol(SIR)]) + 10
 SIRcolor <-   c(S="steelblue",I="firebrick3",R="darkorchid3")
 plot(x = SIR[,"time"],y = SIR[,"S"],type = "l",col = SIRcolor["S"],lwd = 1.85,
@@ -122,6 +123,6 @@ plot(x = SIR[,"time"],y = SIR[,"S"],type = "l",col = SIRcolor["S"],lwd = 1.85,
 lines(x = SIR[,"time"],y = SIR[,"I"],col = SIRcolor["I"],lwd = 1.85)
 lines(x = SIR[,"time"],y = SIR[,"R"],col = SIRcolor["R"],lwd = 1.85)
 
+# just plot the infecteds
 # plot(x = SIR[,"time"],y = SIR[,"I"],type = "l",col = SIRcolor["I"],lwd = 1.5,
 #      xlab = "Time (days)",ylab = "Infecteds")
-
