@@ -59,7 +59,6 @@ hazard <- function(t,state,pars,...){
     
     # infection dynamics
     if(enabled["inf",] > 0){
-      beta <- R0*gamma
       h["inf"] <- state["S"]*state["I"]*beta
     }
     
@@ -84,7 +83,7 @@ hazard <- function(t,state,pars,...){
 # initial marking of SPN
 M0 <- setNames(c(1e3,1,0),SPN_P)
 
-theta <- list("R0"=0.005,"gamma"=1/50,"delta"=1/365)
+theta <- list("beta"=.0001,"gamma"=1/50,"delta"=1/365)
 pars <- list(Pre=Pre,Post=Post,S=S,T=SPN_T,P=SPN_P)
 pars <- c(pars,theta)
 
@@ -103,3 +102,10 @@ lines(x = SIR[,"time"],y = SIR[,"R"],col = SIRcolor["R"],lwd = 1.85)
 # just plot the infecteds
 # plot(x = SIR[,"time"],y = SIR[,"I"],type = "l",col = SIRcolor["I"],lwd = 1.5,
 #      xlab = "Time (days)",ylab = "Infecteds")
+
+
+################################################################################
+#   run the version using header files
+################################################################################
+
+sourceCpp(here::here("gillespie-SIR-CXX-headers/gillespie-sim-headers.cpp"))

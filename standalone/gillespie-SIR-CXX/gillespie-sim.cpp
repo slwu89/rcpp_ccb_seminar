@@ -1,10 +1,22 @@
-
+/* ################################################################################
+ *     _______ ____                _           _____ ____  _   __
+ *    / ____(_) / /__  _________  (_)__       / ___// __ \/ | / /
+ *   / / __/ / / / _ \/ ___/ __ \/ / _ \______\__ \/ /_/ /  |/ / 
+ *  / /_/ / / / /  __(__  ) /_/ / /  __/_____/__/ / ____/ /|  /  
+ *  \____/_/_/_/\___/____/ .___/_/\___/     /____/_/   /_/ |_/   
+ *                      /_/      
+ *                      
+ *  Gillespie's direct method for a stochastic petri net (SPN) model
+ *  Sean Wu (slwu89@berkeley.edu)
+ *  May 2019
+ * 
+################################################################################ */
 
 
 /* Rcpp header file */
 #include <Rcpp.h>
 
-/* algorithm for std::accumulate, iomanip for std::setw */
+/* algorithm for std::accumulate, iomanip for std::setw, string and sstream to write the message to break if h0 = 0 */
 #include <algorithm>
 #include <iomanip>
 #include <string>
@@ -30,7 +42,6 @@ Rcpp::NumericMatrix gillespie_CXX(const Rcpp::IntegerVector& M0,
   Rcpp::CharacterVector colnames = Rcpp::as<Rcpp::CharacterVector>(pars["P"]);
   colnames.push_front("time");
   Rcpp::NumericMatrix out(prealloc,u+1);
-  Rcpp::colnames(out) = colnames;
   std::fill(out.begin(),out.end(),R_NaN);
   
   /* record initial marking */
@@ -100,6 +111,7 @@ Rcpp::NumericMatrix gillespie_CXX(const Rcpp::IntegerVector& M0,
     Rcpp::colnames(out) = colnames;
     return out;
   } else {
+    Rcpp::colnames(out) = colnames;
     return out;
   }
 };
