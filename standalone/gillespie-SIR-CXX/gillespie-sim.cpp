@@ -19,7 +19,6 @@
 /* algorithm for std::accumulate, iomanip for std::setw, string and sstream to write the message to break if h0 = 0 */
 #include <algorithm>
 #include <iomanip>
-#include <string>
 #include <sstream>
 
 // [[Rcpp::export]]
@@ -65,9 +64,8 @@ Rcpp::NumericMatrix gillespie_CXX(const Rcpp::IntegerVector& M0,
     /* if all events have probability 0, break the loop */
     double h0 = std::accumulate(h.begin(),h.end(),0.);
     if(h0 <= 2.22e-16){
-      std::stringstream msg;
-      msg << " --- all events have probability 0, breaking from simulation at time: " << std::setw(4) << time << " --- \n";
-      Rcpp::stop(msg.str());
+      Rcpp::Rcout << " --- all events have probability 0, breaking from simulation at time: " << std::setw(4) << time << " --- \n";
+      break;
     }
     
     /* Gillespie's direct method: P(what | when) * P(when) */
@@ -103,15 +101,20 @@ Rcpp::NumericMatrix gillespie_CXX(const Rcpp::IntegerVector& M0,
   }
   
   // only return the portion of the matrix with actual values
+  // the pecularities of Rcpp objects sometimes generate somewhat arcane looking code, compared to R or Armadillo (more on this later)
   Rcpp::NumericVector rowsums = Rcpp::rowSums(out);
-  bool hasnan = Rcpp::any(Rcpp::is_nan(rowsums));
-  if(hasnan){
-    rowsums = Rcpp::na_omit(rowsums);
-    out = out(Rcpp::Range(0,rowsums.size()-1), Rcpp::_ );
-    Rcpp::colnames(out) = colnames;
-    return out;
-  } else {
-    Rcpp::colnames(out) = colnames;
-    return out;
-  }
+  rowsums = Rcpp::na_omit(rowsums);
+  out = out(Rcpp::Range(0,rowsums.size()-1), Rcpp::_ );
+  Rcpp::colnames(out) = colnames;
+  return out;
+  // bool hasnan = Rcpp::any(Rcpp::is_nan(rowsums));
+  // if(hasnan){
+  //   rowsums = Rcpp::na_omit(rowsums);
+  //   out = out(Rcpp::Range(0,rowsums.size()-1), Rcpp::_ );
+  //   Rcpp::colnames(out) = colnames;
+  //   return out;
+  // } else {
+  //   Rcpp::colnames(out) = colnames;
+  //   return out;
+  // }
 };

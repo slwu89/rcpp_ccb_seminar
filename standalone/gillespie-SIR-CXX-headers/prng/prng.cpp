@@ -21,8 +21,8 @@
 * constructor
 ################################################################################ */
 
-prng::prng(const uint_least32_t seed) : rng(seed){
-  runif = std::uniform_real_distribution<double>(0,1);
+prng::prng(const uint_least32_t seed) : rng(seed), runif(0.0,1.0) {
+  // runif = std::uniform_real_distribution<double>(0,1);
 };
 
 
@@ -35,7 +35,7 @@ double prng::get_runif(){
 };
 
 double prng::get_rexp(const double rate){
-  std::exponential_distribution<double>rexp(rate);
+  std::exponential_distribution<double> rexp(rate);
   return rexp(rng);
 };
 
@@ -45,6 +45,6 @@ double prng::get_rexp(const double rate){
 ################################################################################ */
  
 size_t prng::get_rcategorical(const Rcpp::NumericVector& prob){
- std::discrete_distribution<int>rcategorical(prob.begin(),prob.end());
+ std::discrete_distribution<int> rcategorical(prob.begin(),prob.end());
  return rcategorical(rng);
 };
