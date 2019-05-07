@@ -10,9 +10,9 @@ cl <- makeSOCKcluster(2)
 registerDoSNOW(cl)
 
 # rm(timesTwo)
-
+# 
 # clusterEvalQ(cl,{
-#   Rcpp::sourceCpp('Desktop/code/timestwo.cpp')
+#   Rcpp::sourceCpp(here::here('foreach/timestwo.cpp'))
 # })
 
 
