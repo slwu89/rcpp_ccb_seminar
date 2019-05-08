@@ -108,6 +108,25 @@ plot(x = SIR[,"time"],y = SIR[,"S"],type = "l",col = SIRcolor["S"],lwd = 1.85,
 lines(x = SIR[,"time"],y = SIR[,"I"],col = SIRcolor["I"],lwd = 1.85)
 lines(x = SIR[,"time"],y = SIR[,"R"],col = SIRcolor["R"],lwd = 1.85)
 
+microbenchmark({
+  set.seed(42)
+  gillespie_R(M0 = M0,tmax = 250,pars = pars,haz = hazard,info = 100)},
+  {
+    set.seed(42)
+    gillespie_CXX(M0 = M0,tmax = 250,pars = pars,haz = hazard,info = 100)})
+
+# bench <- ggplot2::ggplot(object, ggplot2::aes_string(x = "expr", 
+#                                                      y = "ntime",fill="expr")) +
+#   ggplot2::coord_cartesian(ylim = c(y_min, y_max)) + 
+#   ggplot2::stat_ydensity() +
+#   ggplot2::scale_x_discrete(name = "") +
+#   ylab(sprintf("Time [%s]", attr(object$ntime, "unit"))) +
+#   guides(fill=F) +
+#   coord_flip() +
+#   theme_bw() +
+#   theme(axis.text.y = element_text(size = 16),axis.title.x = element_text(size = 16)) 
+# ggsave(filename = here("benchmark.png"),plot = bench,device="png")
+
 # just plot the infecteds
 # plot(x = SIR[,"time"],y = SIR[,"I"],type = "l",col = SIRcolor["I"],lwd = 1.5,
 #      xlab = "Time (days)",ylab = "Infecteds")
