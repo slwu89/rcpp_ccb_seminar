@@ -1,5 +1,7 @@
 # CCB Skills Seminar: Combining C++ and R with Rcpp
 
+May 9, 2019: Sean Wu (slwu89@berkeley.edu)
+
 ## Directory Structure
 
 ### standalone
