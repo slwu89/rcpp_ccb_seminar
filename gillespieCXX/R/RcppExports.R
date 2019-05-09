@@ -16,9 +16,14 @@
 #' @examples
 #' \dontrun{
 #' library(gillespieCXX)
+#' library(ggplot2)
+#' library(reshape2)
 #' data(SIR)
-#' gillespie_dm(M0 = SIR$M0,tmax = 250,pars = SIR$pars,haz = SIR$hazard,seed = 12214L,info = 100)
-#' 
+#' out <- gillespie_dm(M0 = SIR$M0,tmax = 250,pars = SIR$pars,haz = SIR$hazard,seed = 12214L,info = 100)
+#' out <- as.data.frame(out)
+#' ggplot(data = melt(out,id.vars="time")) +
+#'   geom_line(aes(x=time,y=value,color=variable)) +
+#'   theme_bw()
 #' }
 #' 
 #' @export
