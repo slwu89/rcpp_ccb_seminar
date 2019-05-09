@@ -21,7 +21,6 @@ library(here)
 library(Rcpp)
 
 source(here::here("gillespie-SIR-R/gillespie-sim.R"))
-sourceCpp(here::here("gillespie-SIR-CXX/gillespie-sim.cpp"))
 
 
 ################################################################################
@@ -51,7 +50,7 @@ S <- t(A)
 hazard <- function(t,state,pars,...){
   
   with(pars,{
-    # browser()
+    
     h <- rep(0,length(T))
     h <- setNames(h,T)
     
@@ -66,10 +65,6 @@ hazard <- function(t,state,pars,...){
       h["rec"] <- state["I"]*gamma
     }
     
-    # if(enabled["wane",] > 0){
-    #   h["wane"] <- state["R"]*delta
-    # }
-    
     return(h)  
   })
   
@@ -77,7 +72,7 @@ hazard <- function(t,state,pars,...){
 
 
 ################################################################################
-#   run the stochastic SIR model
+#   run the stochastic SIR model in R
 ################################################################################
 
 # initial marking of SPN
@@ -87,17 +82,7 @@ theta <- list("beta"=.0001,"gamma"=1/50,"delta"=1/365)
 pars <- list(Pre=Pre,Post=Post,S=S,T=SPN_T,P=SPN_P)
 pars <- c(pars,theta)
 
-# set.seed(42)
-SIR <- gillespie_CXX(M0 = M0,tmax = 250,pars = pars,haz = hazard,info = 100)
-
-# plot trajectory
-ymax <- max(SIR[,2:ncol(SIR)]) + 10
-SIRcolor <-   c(S="steelblue",I="firebrick3",R="darkorchid3")
-plot(x = SIR[,"time"],y = SIR[,"S"],type = "l",col = SIRcolor["S"],lwd = 1.85,
-     ylim = c(0,ymax),xlab = "Time (days)",ylab = "Count",main = "Stochastic SIR")
-lines(x = SIR[,"time"],y = SIR[,"I"],col = SIRcolor["I"],lwd = 1.85)
-lines(x = SIR[,"time"],y = SIR[,"R"],col = SIRcolor["R"],lwd = 1.85)
-
+set.seed(42)
 SIR <- gillespie_R(M0 = M0,tmax = 250,pars = pars,haz = hazard,info = 100)
 
 # plot trajectory
@@ -108,28 +93,23 @@ plot(x = SIR[,"time"],y = SIR[,"S"],type = "l",col = SIRcolor["S"],lwd = 1.85,
 lines(x = SIR[,"time"],y = SIR[,"I"],col = SIRcolor["I"],lwd = 1.85)
 lines(x = SIR[,"time"],y = SIR[,"R"],col = SIRcolor["R"],lwd = 1.85)
 
-microbenchmark({
-  set.seed(42)
-  gillespie_R(M0 = M0,tmax = 250,pars = pars,haz = hazard,info = 100)},
-  {
-    set.seed(42)
-    gillespie_CXX(M0 = M0,tmax = 250,pars = pars,haz = hazard,info = 100)})
 
-# bench <- ggplot2::ggplot(object, ggplot2::aes_string(x = "expr", 
-#                                                      y = "ntime",fill="expr")) +
-#   ggplot2::coord_cartesian(ylim = c(y_min, y_max)) + 
-#   ggplot2::stat_ydensity() +
-#   ggplot2::scale_x_discrete(name = "") +
-#   ylab(sprintf("Time [%s]", attr(object$ntime, "unit"))) +
-#   guides(fill=F) +
-#   coord_flip() +
-#   theme_bw() +
-#   theme(axis.text.y = element_text(size = 16),axis.title.x = element_text(size = 16)) 
-# ggsave(filename = here("benchmark.png"),plot = bench,device="png")
+################################################################################
+#   run the stochastic SIR model in C++
+################################################################################
 
-# just plot the infecteds
-# plot(x = SIR[,"time"],y = SIR[,"I"],type = "l",col = SIRcolor["I"],lwd = 1.5,
-#      xlab = "Time (days)",ylab = "Infecteds")
+sourceCpp(here::here("gillespie-SIR-CXX/gillespie-sim.cpp"))
+
+set.seed(42)
+SIR <- gillespie_CXX(M0 = M0,tmax = 250,pars = pars,haz = hazard,info = 100)
+
+# plot trajectory
+ymax <- max(SIR[,2:ncol(SIR)]) + 10
+SIRcolor <-   c(S="steelblue",I="firebrick3",R="darkorchid3")
+plot(x = SIR[,"time"],y = SIR[,"S"],type = "l",col = SIRcolor["S"],lwd = 1.85,
+     ylim = c(0,ymax),xlab = "Time (days)",ylab = "Count",main = "Stochastic SIR")
+lines(x = SIR[,"time"],y = SIR[,"I"],col = SIRcolor["I"],lwd = 1.85)
+lines(x = SIR[,"time"],y = SIR[,"R"],col = SIRcolor["R"],lwd = 1.85)
 
 
 ################################################################################
