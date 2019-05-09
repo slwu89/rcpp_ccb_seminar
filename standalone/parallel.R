@@ -37,6 +37,8 @@ library(matrixStats)
 
 # discretise continuous time output of the CTMC
 # adapted from the "smfsb" package
+# this is also an example of an excellent candidate for C++-ification
+# (has a few loops, relatively simple logic, short, etc)
 discretise <- function(out, start =0, end = NaN, dt=1){
   
   events <- length(out[,"time"])
@@ -59,6 +61,7 @@ discretise <- function(out, start =0, end = NaN, dt=1){
     return(x)
   }
   
+  # discretise the trajectory
   target <- 0
   j <- 1
   
@@ -68,6 +71,11 @@ discretise <- function(out, start =0, end = NaN, dt=1){
       j <- j+1
       target <- target+dt
     }
+  }
+  
+  # sometime we end up with an extra row. take it out.
+  if(sum(x[nrow(x),-1]) == 0){
+    x <- x[-nrow(x),]
   }
   
   return(x)
@@ -145,7 +153,7 @@ acomb <- function(...) abind(..., along=3)
 SIR_ensemble <- foreach(i = 1:nrep,.combine = acomb,.options.snow=opts) %dopar% {
   
   SIR <- gillespie_CXX(M0 = M0,tmax = tmax,pars = pars,haz = hazard,info = 1e6)
-  discretise(out = SIR,start = 0,end = tmax-1,dt = 1)
+  discretise(out = SIR,start = 0,end = tmax,dt = 1)
   
 }
 
@@ -153,7 +161,7 @@ close(pb)
 stopCluster(cl);rm(cl);gc()
 
 SIR_means <- data.frame(
-  time = 0:(tmax-1),
+  time = 1:tmax,
   S = rowMeans(SIR_ensemble[,"S",]),
   I = rowMeans(SIR_ensemble[,"I",]),
   R = rowMeans(SIR_ensemble[,"R",])
@@ -162,43 +170,18 @@ SIR_means <- data.frame(
 SIR_means <- melt(SIR_means,id.vars = "time")
 
 SIR_sds <- data.frame(
-  time = 0:(tmax-1),
+  time = 1:tmax,
   S = rowSds(SIR_ensemble[,"S",]),
   I = rowSds(SIR_ensemble[,"I",]),
   R = rowSds(SIR_ensemble[,"R",])
 )
 
 SIR_sds <- melt(SIR_sds,id.vars = "time")
-
 SIR_out <- merge(x = SIR_means,y = SIR_sds,by = c("time","variable"),suffixes = c("mean","sd"),sort = F)
 
 ggplot(data = SIR_out) +
   geom_line(aes(x=time,y=valuemean,color=variable)) +
-  geom_ribbon(aes(x=time,ymin=valuemean-valuesd,ymax=valuemean+valuesd,fill=variable),alpha=0.25) +
+  geom_ribbon(aes(x=time,ymin=pmax(0,valuemean-valuesd),ymax=valuemean+valuesd,fill=variable),alpha=0.25) +
+  xlab("Time (days)") +
+  ylab("Counts") +
   theme_bw()
-
-# low <- 0.2
-# high <- 0.8
-# 
-# SIR_quant_low <- data.frame(
-#   time = 0:(tmax-1),
-#   S = apply(SIR_ensemble[,"S",],MARGIN = 1,function(x){quantile(x,probs=(low))} ),
-#   I = apply(SIR_ensemble[,"I",],MARGIN = 1,function(x){quantile(x,probs=(low))} ),
-#   R = apply(SIR_ensemble[,"R",],MARGIN = 1,function(x){quantile(x,probs=(low))} )
-# )
-# SIR_quant_low <- melt(SIR_quant_low,id.vars = "time")
-# 
-# SIR_quant_high <- data.frame(
-#   time = 0:(tmax-1),
-#   S = apply(SIR_ensemble[,"S",],MARGIN = 1,function(x){quantile(x,probs=(high))} ),
-#   I = apply(SIR_ensemble[,"I",],MARGIN = 1,function(x){quantile(x,probs=(high))} ),
-#   R = apply(SIR_ensemble[,"R",],MARGIN = 1,function(x){quantile(x,probs=(high))} )
-# )
-# SIR_quant_high <- melt(SIR_quant_high,id.vars = "time")
-# 
-# SIR_quant <- merge(SIR_quant_low,SIR_quant_high,by = "time",suffixes = c("low","high"))
-# 
-# ggplot() +
-#   geom_line(aes(x=time,y=value,color=variable), data =SIR_means) +
-#   geom_ribbon(aes(x=time,ymin=valuelow,ymax=valuehigh,fill=variablelow,group=variablelow),alpha=0.2,data = SIR_quant) +
-#   theme_bw()

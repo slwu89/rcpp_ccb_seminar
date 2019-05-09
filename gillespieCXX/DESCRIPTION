@@ -1,12 +1,12 @@
 Package: gillespieCXX
 Type: Package
-Title: What the Package Does in One 'Title Case' Line
+Title: Gillespie's Direct Method in C++
 Version: 1.0
 Date: 2019-05-08
-Author: Your Name
-Maintainer: Your Name <your@email.com>
-Description: One paragraph description of what the package does as one or more full sentences.
-License: GPL (>= 2)
+Author: Sean Wu
+Maintainer: Sean Wu <slwu89@berkeley.edu>
+Description: Runs Gillespie's Direct Method for SPN models in C++ to show how to export code to R with Rcpp.
+License: MIT
 Imports: Rcpp
 LinkingTo: Rcpp
 RoxygenNote: 6.1.1
