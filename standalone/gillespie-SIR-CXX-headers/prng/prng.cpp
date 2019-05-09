@@ -21,9 +21,7 @@
 * constructor
 ################################################################################ */
 
-prng::prng(const uint_least32_t seed) : rng(seed), runif(0.0,1.0) {
-  // runif = std::uniform_real_distribution<double>(0,1);
-};
+prng::prng(const uint_least32_t seed) : rng(seed), runif(0.0,1.0) {};
 
 
 /* ################################################################################
